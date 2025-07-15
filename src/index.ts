@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import router from './routes';
 import { setupSwagger } from './utils/swagger';
+import { startExpiredTodosCron } from './cron/markExpiredTodos';
 
 dotenv.config();
 
@@ -21,6 +22,7 @@ mongoose
     console.log('MongoDB connected');
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
+      startExpiredTodosCron()
     });
   })
   .catch((err) => {
