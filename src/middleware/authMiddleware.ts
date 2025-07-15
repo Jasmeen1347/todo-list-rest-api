@@ -1,6 +1,7 @@
 import { Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { IAuthRequest } from '../interfaces/auth/IAuthRequest';
+import status from 'http-status';
 
 export const isAuthenticate = (
   req: IAuthRequest,
@@ -12,7 +13,7 @@ export const isAuthenticate = (
   // Check for Bearer token
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return res
-      .status(401)
+      .status(status.UNAUTHORIZED)
       .json({ message: 'Authentication required. Please log in to continue.' });
   }
 
@@ -23,12 +24,13 @@ export const isAuthenticate = (
       userId: string;
     };
 
-    // Attach userId to request
     req.userId = decoded.userId;
 
     next();
   } catch (error) {
     console.log(error);
-    return res.status(401).json({ message: 'Not authorized, invalid token' });
+    return res
+      .status(status.UNAUTHORIZED)
+      .json({ message: 'Not authorized, invalid token' });
   }
 };

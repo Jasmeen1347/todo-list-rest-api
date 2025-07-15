@@ -2,6 +2,8 @@ import { Response } from 'express';
 import Todo from '../models/Todo';
 import { IAuthRequest } from '../interfaces/auth/IAuthRequest';
 import { isValidObjectId } from 'mongoose';
+import logger from '../utils/logger';
+import status from 'http-status';
 
 export const createTodo = async (req: IAuthRequest, res: Response) => {
   try {
@@ -16,27 +18,36 @@ export const createTodo = async (req: IAuthRequest, res: Response) => {
       user: req.userId
     });
 
-    res.status(201).json(todo);
+    res.status(status.OK).json(todo);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Something went wrong' });
+    logger.error(`Create todo: ${String(error)}`);
+    res
+      .status(status.INTERNAL_SERVER_ERROR)
+      .json({ message: 'Something went wrong' });
   }
 };
 
 export const getTodos = async (req: IAuthRequest, res: Response) => {
   try {
     const todos = await Todo.find({ user: req.userId, isDeleted: false });
-    res.status(200).json(todos);
+    res.status(status.OK).json(todos);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Something went wrong' });
+    logger.error(`get all todo: ${String(error)}`);
+    res
+      .status(status.INTERNAL_SERVER_ERROR)
+      .json({ message: 'Something went wrong' });
   }
 };
 
 export const getTodoById = async (req: IAuthRequest, res: Response) => {
   try {
     if (!isValidObjectId(req.params.id)) {
-      return res.status(400).json({ message: 'Invalid Object id' });
+      logger.error(
+        `Invalid Object ID ${req.params.id} while getting particular todo item`
+      );
+      return res
+        .status(status.BAD_REQUEST)
+        .json({ message: 'Invalid Object id' });
     }
     const todo = await Todo.findOne({
       _id: req.params.id,
@@ -45,13 +56,18 @@ export const getTodoById = async (req: IAuthRequest, res: Response) => {
     });
 
     if (!todo) {
-      return res.status(404).json({ message: 'Todo not found' });
+      logger.error(
+        `Todo not found for ID ${req.params.id} and user ${req.userId} while getting particular todo item`
+      );
+      return res.status(status.NOT_FOUND).json({ message: 'Todo not found' });
     }
 
-    res.status(200).json(todo);
+    res.status(status.OK).json(todo);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Something went wrong' });
+    logger.error(`get todo by id: ${String(error)}`);
+    res
+      .status(status.INTERNAL_SERVER_ERROR)
+      .json({ message: 'Something went wrong' });
   }
 };
 
@@ -66,13 +82,18 @@ export const updateTodo = async (req: IAuthRequest, res: Response) => {
     );
 
     if (!todo) {
-      return res.status(404).json({ message: 'Todo not found' });
+      logger.error(
+        `Todo not found for ID ${req.params.id} and user ${req.userId} while update todo item`
+      );
+      return res.status(status.NOT_FOUND).json({ message: 'Todo not found' });
     }
 
-    res.status(200).json(todo);
+    res.status(status.OK).json(todo);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Something went wrong' });
+    logger.error(`update todo: ${String(error)}`);
+    res
+      .status(status.INTERNAL_SERVER_ERROR)
+      .json({ message: 'Something went wrong' });
   }
 };
 
@@ -87,12 +108,17 @@ export const deleteTodo = async (req: IAuthRequest, res: Response) => {
     );
 
     if (!todo) {
-      return res.status(404).json({ message: 'Todo not found' });
+      logger.error(
+        `Todo not found for ID ${req.params.id} and user ${req.userId} while deleting particular todo item`
+      );
+      return res.status(status.NOT_FOUND).json({ message: 'Todo not found' });
     }
 
-    res.status(200).json({ message: 'Todo deleted' });
+    res.status(status.OK).json({ message: 'Todo deleted' });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Something went wrong' });
+    logger.error(`delete todo: ${String(error)}`);
+    res
+      .status(status.INTERNAL_SERVER_ERROR)
+      .json({ message: 'Something went wrong' });
   }
 };

@@ -1,7 +1,9 @@
 import { Request, Response } from 'express';
 import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
+import status from 'http-status';
 import User from '../models/User';
+import logger from '../utils/logger';
 
 export const signup = async (req: Request, res: Response) => {
   try {
@@ -10,7 +12,10 @@ export const signup = async (req: Request, res: Response) => {
     // Check if user exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ message: 'User already exists' });
+      logger.error(`User already exists ${email}`);
+      return res
+        .status(status.BAD_REQUEST)
+        .json({ message: 'User already exists' });
     }
 
     // Hash password
@@ -25,10 +30,14 @@ export const signup = async (req: Request, res: Response) => {
       password: hashedPassword
     });
 
-    res.status(201).json({ message: 'User created', userId: user._id });
+    res
+      .status(status.CREATED)
+      .json({ message: 'User created', userId: user._id });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Something went wrong' });
+    logger.error(`signup: ${String(error)}`);
+    res
+      .status(status.INTERNAL_SERVER_ERROR)
+      .json({ message: 'Something went wrong' });
   }
 };
 
@@ -39,7 +48,10 @@ export const login = async (req: Request, res: Response) => {
     // Find user
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(400).json({ message: 'Invalid credentials' });
+      logger.error(`invalid credentials for user ${email}`);
+      return res
+        .status(status.BAD_REQUEST)
+        .json({ message: 'Invalid credentials' });
     }
 
     const hashedPassword = crypto
@@ -49,7 +61,10 @@ export const login = async (req: Request, res: Response) => {
     // Compare password
 
     if (hashedPassword !== user.password) {
-      return res.status(400).json({ message: 'Invalid credentials' });
+      logger.error(`Password does not match for user ${email}`);
+      return res
+        .status(status.BAD_REQUEST)
+        .json({ message: 'Invalid credentials' });
     }
 
     // Create JWT
@@ -57,9 +72,11 @@ export const login = async (req: Request, res: Response) => {
       expiresIn: '1d'
     });
 
-    res.status(200).json({ token });
+    res.status(status.OK).json({ token });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Something went wrong' });
+    logger.error(`login: ${String(error)}`);
+    res
+      .status(status.INTERNAL_SERVER_ERROR)
+      .json({ message: 'Something went wrong' });
   }
 };
