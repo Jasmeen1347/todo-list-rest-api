@@ -1,7 +1,6 @@
 import { Request, Response } from 'express';
 import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
-import validator from 'validator';
 import User from '../models/User';
 
 export const signup = async (req: Request, res: Response) => {
@@ -12,21 +11,6 @@ export const signup = async (req: Request, res: Response) => {
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: 'User already exists' });
-    }
-
-    if (
-      !validator.isStrongPassword(password, {
-        minLength: 8,
-        minLowercase: 1,
-        minUppercase: 1,
-        minNumbers: 1,
-        minSymbols: 1
-      })
-    ) {
-      return res.status(400).json({
-        message:
-          'Password must be at least 8 characters long and include uppercase, lowercase, number, and symbol.'
-      });
     }
 
     // Hash password
@@ -58,7 +42,10 @@ export const login = async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
-    const hashedPassword = crypto.createHash('sha256').update(password).digest('hex');
+    const hashedPassword = crypto
+      .createHash('sha256')
+      .update(password)
+      .digest('hex');
     // Compare password
 
     if (hashedPassword !== user.password) {
