@@ -1,6 +1,9 @@
 import { Request, Response } from 'express';
 import logger from '../utils/logger';
 
+/**
+ * Global Express error-handling middleware.
+ */
 export const errorHandler = (err: unknown, _req: Request, res: Response) => {
   if (err instanceof Error) {
     logger.error(err.stack || err.message);

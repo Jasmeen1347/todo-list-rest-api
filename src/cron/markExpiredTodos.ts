@@ -9,7 +9,9 @@ export const startExpiredTodosCron = async () => {
     logger.info(`Running CRON job to mark expired todos...`);
 
     try {
+      // Convert curent time to a Unix timestamp (seconds)
       const now = Math.floor(new Date().getTime() / 1000);
+
       const result = await Todo.updateMany(
         {
           dueDate: { $lt: now },

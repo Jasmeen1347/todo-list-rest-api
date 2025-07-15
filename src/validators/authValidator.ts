@@ -1,5 +1,16 @@
 import { body } from 'express-validator';
 
+/**
+ * Validation rules for user signup.
+ *
+ * - Validates that email is a proper email format.
+ * - Enforces strong password requirements:
+ *   - Minimum 8 characters
+ *   - At least one uppercase letter
+ *   - At least one lowercase letter
+ *   - At least one number
+ *   - At least one symbol
+ */
 export const signupValidator = [
   body('email').isEmail().withMessage('Email is invalid'),
 
@@ -16,6 +27,12 @@ export const signupValidator = [
     )
 ];
 
+/**
+ * Validation rules for user login.
+ *
+ * - Validates that email is in proper format.
+ * - Ensures password field is not empty.
+ */
 export const loginValidator = [
   body('email').isEmail().withMessage('Email is invalid'),
 
