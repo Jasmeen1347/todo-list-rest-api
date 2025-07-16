@@ -26,7 +26,7 @@ export const markExpiredTodos = async () => {
 export const startExpiredTodosCron = async () => {
   // Runs every day at midnight
   // replace all 0 with * to run every minute
-  cron.schedule('* * * * *', async () => {
+  cron.schedule('0 0 * * *', async () => {
     logger.info(`Running CRON job to mark expired todos...`);
 
     markExpiredTodos();

@@ -76,7 +76,7 @@ describe('Todo Routes', () => {
       .get('/api/todos/507f191e810c19729de860ea')
       .set('Authorization', `Bearer ${token}`);
 
-    expect(res.status).toBe(404);
+    expect(res.status).toBe(status.NOT_FOUND);
   });
 
   it('should update todo item', async () => {
